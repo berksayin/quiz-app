@@ -1,3 +1,11 @@
+:root {
+  --correct-bg-color: hsl(135, 32%, 40%);
+  --wrong-bg-color: hsl(2, 86%, 42%);
+  --disabled-bg-color: hsl(0, 0%, 50%);
+
+  --selection-font-color: hsl(0, 0%, 95%);
+}
+
 *,
 *:before,
 *:after {
@@ -136,4 +144,23 @@ button:disabled {
   background-color: hsl(0, 0%, 50%);
   color: hsl(0, 0%, 30%);
   cursor: not-allowed;
+}
+
+.show-summary {
+  background-color: var(--correct-bg-color) !important;
+}
+
+.correct {
+  background-color: var(--correct-bg-color) !important;
+  color: var(--selection-font-color);
+}
+
+.wrong {
+  background-color: var(--wrong-bg-color) !important;
+  color: var(--selection-font-color);
+}
+
+.disabled {
+  background-color: var(--disabled-bg-color);
+  pointer-events: none;
 }
