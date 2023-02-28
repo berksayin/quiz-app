@@ -10,142 +10,211 @@
   SORULAR
 */
 
-const questionList = [
-  {
+// const questionList = [
+//   {
+//     question: 'Atatürk kaç yılında doğmuştur?',
+//     answers: ['1881', '1882', '1883', '1884'],
+//     correctAnswer: '1881',
+//   },
+//   {
+//     question: 'Siyahın zıttı nedir?',
+//     answers: ['Sarı', 'Mavi', 'Beyaz', 'Kırmızı'],
+//     correctAnswer: 'Beyaz',
+//   },
+//   {
+//     question:
+//       "World Wide Web'in mucidi ve HTML işaretleme dilini geliştiren mucit kimdir?",
+//     answers: ['Steve Jobs', 'Tim Berners Lee', 'Mark Zuckerberg', 'Bill Gates'],
+//     correctAnswer: 'Tim Berners Lee',
+//   },
+//   {
+//     question: "Steam'in kurucusu kimdir?",
+//     answers: ['Elon Musk', 'Jack Dorsey', 'Tim Cook', 'Gabe Newell'],
+//     correctAnswer: 'Gabe Newell',
+//   },
+//   {
+//     question: "Aşağıdakilerden hangisi R&B'nin açılımıdır?",
+//     answers: [
+//       'Rhythm and Blues',
+//       'Rhythm and Bandos',
+//       'Rock and Blues',
+//       'Rap and Blues',
+//     ],
+//     correctAnswer: 'Rhythm and Blues',
+//   },
+// ];
+
+const questionObject = {
+  0: {
     question: 'Atatürk kaç yılında doğmuştur?',
-    answers: ['1881', '1882', '1883', '1884'],
-    correctAnswer: '1881',
+    answers: {
+      A: '1881',
+      B: '1882',
+      C: '1883',
+      D: '1884',
+    },
+    correctAnswer: 'A',
   },
-  {
+  1: {
     question: 'Siyahın zıttı nedir?',
-    answers: ['Sarı', 'Mavi', 'Beyaz', 'Kırmızı'],
-    correctAnswer: 'Beyaz',
+    answers: {
+      A: 'Sarı',
+      B: 'Mavi',
+      C: 'Beyaz',
+      D: 'Kırmızı',
+    },
+    correctAnswer: 'C',
   },
-  {
-    question: "World Wide Web'in mucidi ve HTML işaretleme dilini geliştiren mucit kimdir?",
-    answers: ['Steve Jobs', 'Tim Berners Lee', 'Mark Zuckerberg', 'Bill Gates'],
-    correctAnswer: 'Tim Berners Lee',
-  },
-  {
-    question: "Steam'in kurucusu kimdir?",
-    answers: ['Elon Musk', 'Jack Dorsey', 'Tim Cook', 'Gabe Newell'],
-    correctAnswer: 'Beyaz',
-  },
-  {
-    question: "Aşağıdakilerden hangisi R&B'nin açılımıdır?",
-    answers: ['Rhythm and Blues', 'Rhythm and Bandos', 'Rock and Blues', 'Rap and Blues'],
-    correctAnswer: 'Rhythm and Blues',
-  },
-];
+};
+
+// LOCAL STORAGE
+localStorage.setItem(
+  'QUIZ_APP_STATE',
+  JSON.stringify({
+    score: 10,
+  })
+);
 
 /*
   ATAMALAR
 */
-const selectedAnswer_li = document.querySelectorAll('.option-list .option-item');
+let selectedAnswer_li, optionTitles, optionAnswers;
+
+const grabber = () => {
+  // Bu atama yükleme yapıldıktan sonra yapılırsa sistem çalışır.
+  selectedAnswer_li = document.querySelectorAll('.option-list .option-item');
+  optionTitles = document.querySelectorAll('.option-item .option-title');
+  optionAnswers = document.querySelectorAll('.option-item .option');
+};
 
 const button = document.getElementById('btn-next');
 let score = document.querySelector('.score');
 let step = document.querySelector('.step');
-let question_p = document.querySelector('.question-area .question');
-let answers = document.querySelectorAll('.option-item .option');
+let questionArea = document.querySelector('.question-area');
 let progress = document.querySelector('.step');
+const options = document.getElementById('option-list');
 
 let scoreSecret = 0; // Bu sayede skora dışarıdan erişim engelleniyor.
 
+const ANSWER_COUNT_BY_QUESTION = 4;
 // Tüm elementleri seçer
 const allElements = document.querySelectorAll('*');
 
-// Temizleyici
-const clearTheQuiz = () => {
-  allElements.forEach((element) => {
-    element.classList.remove('wrong', 'correct', 'disabled');
-  });
-};
-
 // Sayaç
-let c = 0;
+let counter = 0;
 
 // Güncel doğru cevap
 var currentCorrectAnswer = '';
 
 // Soruları getiren fonksiyon
 window.onload = getQuestion = () => {
-  clearTheQuiz();
-  if (c < questionList.length) {
-    // Kademeleri gösteriyor.
-    progress.innerText = c + 1 + '/' + questionList.length;
+  clearQuiz();
+  renderQuestion();
+};
 
-    // Soru getiriyor
-    question_p.innerText = questionList[c].question;
+// Temizleyici
+const clearQuiz = () => {
+  allElements.forEach((element) => {
+    element.classList.remove('wrong', 'correct', 'disabled');
+  });
+};
 
-    // Cevapları getiriyor
-    answers[0].innerText = questionList[c].answers[0];
-    answers[1].innerText = questionList[c].answers[1];
-    answers[2].innerText = questionList[c].answers[2];
-    answers[3].innerText = questionList[c].answers[3];
+const questionTotal = Object.keys(questionObject).length;
 
-    // Doğru cevabı değişkende saklar.
-    currentCorrectAnswer = questionList[c].correctAnswer;
+const renderQuestion = () => {
+  if (counter >= questionTotal) return console.log('Sorular bitti.');
 
-    c++;
-  } else {
-    console.log('Sorular bitti.');
+  // Kademeleri gösteriyor.
+  progress.innerText = counter + 1 + '/' + questionTotal;
+
+  let titles = Object.keys(questionObject[counter].answers);
+  let answers = Object.values(questionObject[counter].answers);
+  // DÖNGÜYLE GELMESİ GEREKİYOR, YENİ ŞIK EKLENEBİLİR
+
+  const question = document.createElement('p');
+  question.classList.add('question');
+
+  // Soru getiriyor
+  question.innerText = questionObject[counter].question;
+  // Soruyu ekliyor
+  questionArea.appendChild(question);
+
+  // Doğru cevabı alıyor
+  currentCorrectAnswer = questionObject[counter].correctAnswer;
+
+  // Cevapları getiriyor
+  // * BU KISIM createElement İLE DÜZENLENDİ
+  for (let i = 0; i < titles.length; i++) {
+    // // optionTitles[i].innerText = titles[i];
+    // // optionAnswers[i].innerText = answers[i];
+    // options.innerHTML += `
+    //   <li class="option-item">
+    //           <span class="option-title">${titles[i]}</span>
+    //           <span class="option">${answers[i]}</span>
+    //         </li>
+    // `;
+
+    const optionItem = document.createElement('li');
+    const optionTitle = document.createElement('span');
+    const option = document.createElement('span');
+
+    optionItem.classList.add('option-item');
+    optionTitle.classList.add('option-title');
+    option.classList.add('option');
+    optionTitle.innerText = titles[i];
+    option.innerText = answers[i];
+
+    options.appendChild(optionItem);
+    optionItem.appendChild(optionTitle);
+    optionItem.appendChild(option);
+  }
+
+  grabber();
+  selectAnswer();
+  counter++;
+};
+
+const selectAnswer = () => {
+  selectedAnswer_li.forEach((select) => {
+    select.addEventListener('click', (e) => {
+      evaluateAnswers(e.target.closest('li'));
+      button.disabled = false;
+    });
+  });
+};
+
+const evaluateAnswers = (selectedOption) => {
+  console.log('selectedOption :>> ', selectedOption);
+  for (let correctOption of selectedAnswer_li) {
+    correctOption.classList.add('disabled');
+    if (correctOption.firstChild.innerText == currentCorrectAnswer) {
+      correctOption.classList.add('correct');
+    }
+  }
+  if (selectedOption.firstChild.innerText != currentCorrectAnswer) {
+    selectedOption.classList.add('wrong');
   }
 };
 
-/*
-  EVENTLER
-*/
+// TODO: BURADAN AŞAĞISI GÜNCELLENECEK
 
-// CEVAP SEÇİLDİKTEN SONRAKİ EVENTLER
-
-selectedAnswer_li.forEach((select) => {
-  select.addEventListener('click', (e) => {
-    // Seçim sonrası tüm seçeneklerin disabled olması
-    for (let i = 0; i < selectedAnswer_li.length; i++) {
-      selectedAnswer_li[i].classList.add('disabled');
-    }
-
-    // En yakın belirtilen elemanı seçiyor
-    let selectedOptionTitle = e.target.closest('li');
-    let selectedOption = e.target.closest('li');
-
-    for (let correctOption of selectedAnswer_li) {
-      if (correctOption.children[1].innerText == currentCorrectAnswer) {
-        // Doğru şıkka 'correct' classı geliyor.
-        correctOption.classList.add('correct');
-      }
-    }
-
-    // DOĞRU ŞIKKI GÖSTERECEK YEŞİL ARKAPLAN IF DIŞINDA YAZILMALI
-    // ÇÜNKÜ HER KOŞULDA DOĞRU ŞIK YEŞİLLE GÖSTERİLECEK!
-    if (selectedOption.children[1].innerText == currentCorrectAnswer) {
-      // DOĞRU ŞIK İŞARETLENMESİ DURUMU
-      scoreSecret += 10;
-      console.log('Scored: +10');
-      score.innerText = scoreSecret;
-      console.log('Doğru cevap');
-    } else {
-      console.log('Yanlış cevap');
-      selectedOption.classList.add('wrong');
-    }
-
-    console.log('Current Score:', score.innerText);
-
-    console.log(`Selected title: ${selectedOptionTitle.children[0].innerText} option: ${selectedOption.children[1].innerText}`);
-    button.toggleAttribute('disabled');
-
-    // Son soruysa butonu değiştir.
-    if (c == questionList.length) {
-      console.log('SONA GELDİK');
-      button.classList.toggle('show-summary');
-      button.innerText = 'Results';
-    }
-  });
-});
+const setUserScore = (currentOption) => {
+  if (currentOption.children[1].innerText == currentCorrectAnswer) {
+    // DOĞRU ŞIK İŞARETLENMESİ DURUMU
+    scoreSecret += 10;
+    console.log('Scored: +10');
+    score.innerText = scoreSecret;
+    console.log('Doğru cevap');
+  } else {
+    console.log('Yanlış cevap');
+    currentOption.classList.add('wrong');
+  }
+  console.log('Current Score:', score.innerText);
+};
 
 // NEXT'E BASILDIKTAN SONRA OLAN EVENTLER
 button.addEventListener('click', (e) => {
+  console.log('button', button);
   button.toggleAttribute('disabled');
   if (!button.classList.contains('show-summary')) {
     if (c != questionList.length) {

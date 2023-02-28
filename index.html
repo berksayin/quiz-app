@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
       rel="stylesheet"
@@ -14,41 +13,40 @@
     <title>QUIZ APP</title>
   </head>
   <body>
-    <div class="wrapper">
-      <div class="quiz-screen">
+    <main class="wrapper">
+      <section class="quiz-screen">
         <div class="info-bar">
           <span class="progress">Question: <span class="step">x/x</span></span>
           <span class="summary">Score: <span class="score">0</span></span>
         </div>
         <div class="question-area">
-          <p class="question">Dummy Text</p>
+          <!-- <p class="question"></p> -->
         </div>
-        <div class="options">
+        <div id="options" class="options">
           <ul id="option-list" class="option-list">
-            <li class="option-item">
-              <span class="option-title">A</span>
-              <span class="option">Dummy Text</span>
+            <!-- <li class="option-item">
+              <span class="option-title"></span>
+              <span class="option"></span>
             </li>
             <li class="option-item">
-              <span class="option-title">B</span>
-              <span class="option">Dummy Text</span>
+              <span class="option-title"></span>
+              <span class="option"></span>
             </li>
             <li class="option-item">
-              <span class="option-title">C</span>
-              <span class="option">Dummy Text</span>
+              <span class="option-title"></span>
+              <span class="option"></span>
             </li>
             <li class="option-item">
-              <span class="option-title">D</span>
-              <span class="option">Dummy Text</span>
-            </li>
+              <span class="option-title"></span>
+              <span class="option"></span>
+            </li> -->
           </ul>
         </div>
-      </div>
-      <div class="button-area">
-        <!-- BUTTONS -->
-        <button id="btn-next" class="btn-next" disabled>Next</button>
-      </div>
-    </div>
+        <div class="button-area">
+          <button id="btn-next" class="btn-next" disabled>Next</button>
+        </div>
+      </section>
+    </main>
     <script src="quiz.js"></script>
   </body>
 </html>

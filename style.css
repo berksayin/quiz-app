@@ -2,7 +2,6 @@
   --correct-bg-color: hsl(135, 32%, 40%);
   --wrong-bg-color: hsl(2, 86%, 42%);
   --disabled-bg-color: hsl(0, 0%, 50%);
-
   --selection-font-color: hsl(0, 0%, 95%);
 }
 
@@ -115,6 +114,10 @@ body {
 }
 
 .option-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
   font-size: 2rem;
   cursor: pointer;
   background-color: hsl(0, 0%, 95%);
