@@ -1,11 +1,3 @@
-/* 
-    YAPILMASI GEREKENLER
-     1. SORU AŞAMALARI YAZACAK
-     2. SORULAR VE ŞIKLAR DÖNGÜ VEYA FONKSİYONLA GELMELİ
-     3. NEXT'E BASILDIĞINDA SIRADAKİ SORU GELECEK
-     4. SONUNDA SONUÇ GÖSTERİLECEK VE TEKRAR BAŞLA BUTONU OLACAK
-*/
-
 /*
   SORULAR
 */
@@ -46,7 +38,7 @@
 
 const questionObject = {
   0: {
-    question: 'Atatürk kaç yılında doğmuştur?',
+    question: 'Atatürk hangi yılda doğmuştur?',
     answers: {
       A: '1881',
       B: '1882',
@@ -65,15 +57,45 @@ const questionObject = {
     },
     correctAnswer: 'C',
   },
+  2: {
+    question: "World Wide Web'in mucidi ve HTML işaretleme dilini geliştiren mucit kimdir?",
+    answers: {
+      A: 'Steve Jobs',
+      B: 'Tim Berners Lee',
+      C: 'Mark Zuckerberg',
+      D: 'Bill Gates',
+    },
+    correctAnswer: 'B',
+  },
+  3: {
+    question: "Steam'in kurucusu kimdir?",
+    answers: {
+      A: 'Elon Musk',
+      B: 'Jack Dorsey',
+      C: 'Tim Cook',
+      D: 'Gabe Newell',
+    },
+    correctAnswer: 'D',
+  },
 };
 
-// LOCAL STORAGE
-localStorage.setItem(
-  'QUIZ_APP_STATE',
-  JSON.stringify({
-    score: 10,
-  })
-);
+// TODO: HER SORU SONRASI LOCAL STORAGE'YE KAYIT EDİLECEK, ÇIK GİR YAPILDIĞINDA AYNI SORUDAN DEVAM EDECEK
+// TODO: SINAV SONUNDA LOCAL'DE TUTULAN YANITLAR VE PUAN GELECEK
+
+// TODO: Bu global değişkenler uygulama açıldığında localdeki karşılıklara eşitlenmeli.
+let currentQuestion, finalAnswers, correctAnswers;
+
+const setToLocalStorage = () => {
+  (currentQuestion = counter + 1), (finalAnswers = answersGiven), (correctAnswers = answerKey);
+  localStorage.setItem(
+    'Progress',
+    JSON.stringify({
+      currentQuestion: currentQuestion,
+      finalAnswers: finalAnswers,
+      correctAnswers: correctAnswers,
+    })
+  );
+};
 
 /*
   ATAMALAR
@@ -90,7 +112,7 @@ const grabber = () => {
 const button = document.getElementById('btn-next');
 let score = document.querySelector('.score');
 let step = document.querySelector('.step');
-let questionArea = document.querySelector('.question-area');
+let questionArea = document.getElementById('question-area');
 let progress = document.querySelector('.step');
 const options = document.getElementById('option-list');
 
@@ -117,9 +139,14 @@ const clearQuiz = () => {
   allElements.forEach((element) => {
     element.classList.remove('wrong', 'correct', 'disabled');
   });
+  questionArea.innerHTML = '';
+  options.innerHTML = '';
 };
 
 const questionTotal = Object.keys(questionObject).length;
+
+// Cevap Anahtarı
+const answerKey = [];
 
 const renderQuestion = () => {
   if (counter >= questionTotal) return console.log('Sorular bitti.');
@@ -142,18 +169,12 @@ const renderQuestion = () => {
   // Doğru cevabı alıyor
   currentCorrectAnswer = questionObject[counter].correctAnswer;
 
+  // Doğru cevapları bir dizide toplar.
+  answerKey.push(currentCorrectAnswer);
+
   // Cevapları getiriyor
   // * BU KISIM createElement İLE DÜZENLENDİ
   for (let i = 0; i < titles.length; i++) {
-    // // optionTitles[i].innerText = titles[i];
-    // // optionAnswers[i].innerText = answers[i];
-    // options.innerHTML += `
-    //   <li class="option-item">
-    //           <span class="option-title">${titles[i]}</span>
-    //           <span class="option">${answers[i]}</span>
-    //         </li>
-    // `;
-
     const optionItem = document.createElement('li');
     const optionTitle = document.createElement('span');
     const option = document.createElement('span');
@@ -164,27 +185,41 @@ const renderQuestion = () => {
     optionTitle.innerText = titles[i];
     option.innerText = answers[i];
 
-    options.appendChild(optionItem);
-    optionItem.appendChild(optionTitle);
-    optionItem.appendChild(option);
+    options.append(optionItem);
+    optionItem.append(optionTitle);
+    optionItem.append(option);
   }
 
   grabber();
   selectAnswer();
   counter++;
+  beforeSummary();
+};
+
+const beforeSummary = () => {
+  if (counter == questionTotal) {
+    console.log('SON SORU');
+    button.innerText = 'Summary';
+  }
 };
 
 const selectAnswer = () => {
   selectedAnswer_li.forEach((select) => {
     select.addEventListener('click', (e) => {
       evaluateAnswers(e.target.closest('li'));
+      setUserScore(e.target.closest('li'));
       button.disabled = false;
+
+      setToLocalStorage();
     });
   });
 };
 
+// Kullanıcının verdiği yanıtlar.
+const answersGiven = [];
+
 const evaluateAnswers = (selectedOption) => {
-  console.log('selectedOption :>> ', selectedOption);
+  // console.log('selectedOption :>> ', selectedOption);
   for (let correctOption of selectedAnswer_li) {
     correctOption.classList.add('disabled');
     if (correctOption.firstChild.innerText == currentCorrectAnswer) {
@@ -194,36 +229,44 @@ const evaluateAnswers = (selectedOption) => {
   if (selectedOption.firstChild.innerText != currentCorrectAnswer) {
     selectedOption.classList.add('wrong');
   }
+  answersGiven.push(selectedOption.firstChild.innerText);
 };
 
-// TODO: BURADAN AŞAĞISI GÜNCELLENECEK
-
 const setUserScore = (currentOption) => {
-  if (currentOption.children[1].innerText == currentCorrectAnswer) {
+  if (currentOption.children[0].innerText == currentCorrectAnswer) {
     // DOĞRU ŞIK İŞARETLENMESİ DURUMU
     scoreSecret += 10;
-    console.log('Scored: +10');
     score.innerText = scoreSecret;
     console.log('Doğru cevap');
   } else {
     console.log('Yanlış cevap');
-    currentOption.classList.add('wrong');
   }
   console.log('Current Score:', score.innerText);
 };
 
+// TODO: BURADAN AŞAĞISI GÜNCELLENECEK
+
 // NEXT'E BASILDIKTAN SONRA OLAN EVENTLER
-button.addEventListener('click', (e) => {
-  console.log('button', button);
-  button.toggleAttribute('disabled');
-  if (!button.classList.contains('show-summary')) {
-    if (c != questionList.length) {
-      getQuestion();
-    }
+
+const getNextQuestion = () => {
+  if (counter != questionTotal) {
+    getQuestion();
   } else {
-    alert(`Quiz Bitti:
-    🏆 Skor: ${scoreSecret}
-    `);
+    showSummary();
     window.location.reload();
   }
+};
+
+const showSummary = () => {
+  alert(`Quiz Bitti:
+    🏆 Skor: ${scoreSecret}
+    📗 Cevap Anahtarı: ${answerKey}
+    📘 Verilen Cevaplar: ${answersGiven}
+    `);
+  localStorage.removeItem('Progress');
+};
+
+button.addEventListener('click', (e) => {
+  getNextQuestion();
+  button.toggleAttribute('disabled');
 });
