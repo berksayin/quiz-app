@@ -83,16 +83,34 @@ const questionObject = {
 // TODO: SINAV SONUNDA LOCAL'DE TUTULAN YANITLAR VE PUAN GELECEK
 
 // TODO: Bu global değişkenler uygulama açıldığında localdeki karşılıklara eşitlenmeli.
-let currentQuestion, finalAnswers, correctAnswers;
+let currentQuestion,
+  finalAnswers = [],
+  correctAnswers = [],
+  currentScore;
+
+const getFromLocalStorage = () => {
+  const arr = JSON.parse(localStorage.getItem('Progress'));
+  console.log(arr);
+  if (arr !== null) {
+    currentQuestion = arr.currentQuestion;
+    finalAnswers = arr.finalAnswers;
+    correctAnswers = arr.correctAnswers;
+    currentScore = arr.currentScore;
+  } else {
+    currentQuestion = 0;
+    currentScore = 0;
+  }
+};
 
 const setToLocalStorage = () => {
-  (currentQuestion = counter + 1), (finalAnswers = answersGiven), (correctAnswers = answerKey);
+  currentQuestion, finalAnswers, correctAnswers, currentScore;
   localStorage.setItem(
     'Progress',
     JSON.stringify({
       currentQuestion: currentQuestion,
       finalAnswers: finalAnswers,
       correctAnswers: correctAnswers,
+      currentScore: currentScore,
     })
   );
 };
@@ -116,14 +134,11 @@ let questionArea = document.getElementById('question-area');
 let progress = document.querySelector('.step');
 const options = document.getElementById('option-list');
 
-let scoreSecret = 0; // Bu sayede skora dışarıdan erişim engelleniyor.
+// let scoreSecret = 0; // Bu sayede skora dışarıdan erişim engelleniyor.
 
 const ANSWER_COUNT_BY_QUESTION = 4;
 // Tüm elementleri seçer
 const allElements = document.querySelectorAll('*');
-
-// Sayaç
-let counter = 0;
 
 // Güncel doğru cevap
 var currentCorrectAnswer = '';
@@ -145,32 +160,30 @@ const clearQuiz = () => {
 
 const questionTotal = Object.keys(questionObject).length;
 
-// Cevap Anahtarı
-const answerKey = [];
-
 const renderQuestion = () => {
-  if (counter >= questionTotal) return console.log('Sorular bitti.');
+  getFromLocalStorage();
+  score.innerText = currentScore;
 
   // Kademeleri gösteriyor.
-  progress.innerText = counter + 1 + '/' + questionTotal;
+  progress.innerText = currentQuestion + 1 + '/' + questionTotal;
 
-  let titles = Object.keys(questionObject[counter].answers);
-  let answers = Object.values(questionObject[counter].answers);
+  let titles = Object.keys(questionObject[currentQuestion].answers);
+  let answers = Object.values(questionObject[currentQuestion].answers);
   // DÖNGÜYLE GELMESİ GEREKİYOR, YENİ ŞIK EKLENEBİLİR
 
   const question = document.createElement('p');
   question.classList.add('question');
 
   // Soru getiriyor
-  question.innerText = questionObject[counter].question;
+  question.innerText = questionObject[currentQuestion].question;
   // Soruyu ekliyor
   questionArea.appendChild(question);
 
   // Doğru cevabı alıyor
-  currentCorrectAnswer = questionObject[counter].correctAnswer;
+  currentCorrectAnswer = questionObject[currentQuestion].correctAnswer;
 
   // Doğru cevapları bir dizide toplar.
-  answerKey.push(currentCorrectAnswer);
+  correctAnswers.push(currentCorrectAnswer);
 
   // Cevapları getiriyor
   // * BU KISIM createElement İLE DÜZENLENDİ
@@ -192,12 +205,12 @@ const renderQuestion = () => {
 
   grabber();
   selectAnswer();
-  counter++;
+  currentQuestion++;
   beforeSummary();
 };
 
 const beforeSummary = () => {
-  if (counter == questionTotal) {
+  if (currentQuestion == questionTotal) {
     console.log('SON SORU');
     button.innerText = 'Summary';
   }
@@ -215,9 +228,6 @@ const selectAnswer = () => {
   });
 };
 
-// Kullanıcının verdiği yanıtlar.
-const answersGiven = [];
-
 const evaluateAnswers = (selectedOption) => {
   // console.log('selectedOption :>> ', selectedOption);
   for (let correctOption of selectedAnswer_li) {
@@ -229,14 +239,14 @@ const evaluateAnswers = (selectedOption) => {
   if (selectedOption.firstChild.innerText != currentCorrectAnswer) {
     selectedOption.classList.add('wrong');
   }
-  answersGiven.push(selectedOption.firstChild.innerText);
+  finalAnswers.push(selectedOption.firstChild.innerText);
 };
 
 const setUserScore = (currentOption) => {
   if (currentOption.children[0].innerText == currentCorrectAnswer) {
     // DOĞRU ŞIK İŞARETLENMESİ DURUMU
-    scoreSecret += 10;
-    score.innerText = scoreSecret;
+    currentScore += 10;
+    score.innerText = currentScore;
     console.log('Doğru cevap');
   } else {
     console.log('Yanlış cevap');
@@ -249,7 +259,7 @@ const setUserScore = (currentOption) => {
 // NEXT'E BASILDIKTAN SONRA OLAN EVENTLER
 
 const getNextQuestion = () => {
-  if (counter != questionTotal) {
+  if (currentQuestion != questionTotal) {
     getQuestion();
   } else {
     showSummary();
@@ -259,9 +269,9 @@ const getNextQuestion = () => {
 
 const showSummary = () => {
   alert(`Quiz Bitti:
-    🏆 Skor: ${scoreSecret}
-    📗 Cevap Anahtarı: ${answerKey}
-    📘 Verilen Cevaplar: ${answersGiven}
+    🏆 Skor: ${currentScore}
+    📗 Cevap Anahtarı: ${correctAnswers}
+    📘 Verilen Cevaplar: ${finalAnswers}
     `);
   localStorage.removeItem('Progress');
 };
